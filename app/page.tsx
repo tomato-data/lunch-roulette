@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 
 interface User {
   id: string;
@@ -173,6 +174,9 @@ export default function Home() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
         <h1 style={{ margin: 0 }}>Lunch Roulette</h1>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Link href="/restaurants" style={{ padding: "4px 12px", fontSize: 12, background: "#f0f0f0", borderRadius: 4, textDecoration: "none", color: "#333" }}>
+            식당 관리
+          </Link>
           <span style={{ color: "#666" }}>{user.nickname}님</span>
           <button onClick={logout} style={{ padding: "4px 8px", fontSize: 12, color: "#999" }}>
             변경

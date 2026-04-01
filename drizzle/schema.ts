@@ -27,6 +27,20 @@ export const menuItems = sqliteTable("menu_items", {
   name: text("name").notNull(),
 });
 
+export const restaurants = sqliteTable("restaurants", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  category: text("category"),
+  description: text("description"),
+  photoPath: text("photo_path"),
+  createdAt: text("created_at")
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+  updatedAt: text("updated_at")
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+});
+
 export const votes = sqliteTable("votes", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   sessionId: integer("session_id")

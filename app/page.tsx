@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import Navigation from "@/app/components/navigation";
 
 interface User {
   id: string;
@@ -39,12 +39,10 @@ export default function Home() {
   const [newMenu, setNewMenu] = useState("");
   const [message, setMessage] = useState("");
 
-  // Load user from localStorage on mount
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored) as User;
-      // Verify user still exists on server
       fetch(`/api/users?id=${parsed.id}`).then((res) => {
         if (res.ok) {
           setUser(parsed);
@@ -145,24 +143,90 @@ export default function Home() {
     fetchSessions();
   }
 
-  // Nickname registration screen
+  // Login screen
   if (!user) {
     return (
-      <div style={{ maxWidth: 400, margin: "0 auto", padding: 40, fontFamily: "sans-serif", textAlign: "center" }}>
-        <h1>Lunch Roulette</h1>
-        <p style={{ color: "#666", marginBottom: 24 }}>닉네임을 설정해주세요</p>
-        <div style={{ display: "flex", gap: 8 }}>
-          <input
-            value={nicknameInput}
-            onChange={(e) => setNicknameInput(e.target.value)}
-            placeholder="닉네임 입력"
-            onKeyDown={(e) => e.key === "Enter" && registerUser()}
-            style={{ flex: 1, padding: 12, fontSize: 16 }}
-            autoFocus
-          />
-          <button onClick={registerUser} style={{ padding: "12px 20px", fontSize: 16 }}>
-            시작
-          </button>
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "var(--color-background)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div
+          style={{
+            width: "100%",
+            maxWidth: 400,
+            padding: 40,
+            textAlign: "center",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 48,
+              marginBottom: 8,
+            }}
+          >
+            🍃
+          </div>
+          <h1
+            style={{
+              fontFamily: "var(--font-heading)",
+              fontSize: 28,
+              color: "var(--color-primary)",
+              marginBottom: 8,
+            }}
+          >
+            Lunch Roulette
+          </h1>
+          <p
+            style={{
+              color: "var(--color-text-muted)",
+              marginBottom: 32,
+              fontSize: 15,
+              fontFamily: "var(--font-body)",
+            }}
+          >
+            닉네임을 설정해주세요
+          </p>
+          <div style={{ display: "flex", gap: 8 }}>
+            <input
+              value={nicknameInput}
+              onChange={(e) => setNicknameInput(e.target.value)}
+              placeholder="닉네임 입력"
+              onKeyDown={(e) => e.key === "Enter" && registerUser()}
+              autoFocus
+              style={{
+                flex: 1,
+                padding: "12px 16px",
+                fontSize: 16,
+                border: "2px solid var(--color-border)",
+                borderRadius: 10,
+                background: "var(--color-surface)",
+                color: "var(--color-text)",
+                fontFamily: "var(--font-body)",
+                outline: "none",
+              }}
+            />
+            <button
+              onClick={registerUser}
+              style={{
+                padding: "12px 24px",
+                fontSize: 16,
+                fontWeight: 600,
+                background: "var(--color-primary)",
+                color: "#fff",
+                border: "none",
+                borderRadius: 10,
+                cursor: "pointer",
+                fontFamily: "var(--font-body)",
+              }}
+            >
+              시작
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -170,140 +234,355 @@ export default function Home() {
 
   // Main app
   return (
-    <div style={{ maxWidth: 600, margin: "0 auto", padding: 20, fontFamily: "sans-serif" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-        <h1 style={{ margin: 0 }}>Lunch Roulette</h1>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Link href="/spinner" style={{ padding: "4px 12px", fontSize: 12, background: "#dbeafe", borderRadius: 4, textDecoration: "none", color: "#3b82f6" }}>
-            룰렛
-          </Link>
-          <Link href="/restaurants" style={{ padding: "4px 12px", fontSize: 12, background: "#f0f0f0", borderRadius: 4, textDecoration: "none", color: "#333" }}>
-            식당 관리
-          </Link>
-          <span style={{ color: "#666" }}>{user.nickname}님</span>
-          <button onClick={logout} style={{ padding: "4px 8px", fontSize: 12, color: "#999" }}>
-            변경
-          </button>
-        </div>
-      </div>
-
-      {/* Session Creation */}
-      <section style={{ marginBottom: 24 }}>
-        <h2>새 투표 세션</h2>
-        <div style={{ display: "flex", gap: 8 }}>
-          <input
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-            placeholder="예: 금요일 점심"
-            onKeyDown={(e) => e.key === "Enter" && createSession()}
-            style={{ flex: 1, padding: 8 }}
-          />
-          <button onClick={createSession} style={{ padding: "8px 16px" }}>
-            만들기
-          </button>
-        </div>
-      </section>
-
-      {/* Session List */}
-      <section style={{ marginBottom: 24 }}>
-        <h2>세션 목록</h2>
-        {sessions.length === 0 && <p>세션이 없습니다. 새로 만들어보세요!</p>}
-        {sessions.map((s) => (
-          <button
-            key={s.id}
-            onClick={() => selectSession(s)}
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "var(--color-background)",
+      }}
+    >
+      <Navigation />
+      <main style={{ maxWidth: 640, margin: "0 auto", padding: "24px 20px" }}>
+        {/* User info */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            gap: 8,
+            marginBottom: 24,
+          }}
+        >
+          <span
             style={{
-              display: "block",
-              width: "100%",
-              padding: 12,
-              marginBottom: 4,
-              textAlign: "left",
-              background: selectedSession?.id === s.id ? "#e0e7ff" : "#f5f5f5",
-              border: "1px solid #ddd",
-              borderRadius: 4,
+              fontSize: 14,
+              color: "var(--color-text-muted)",
+              fontFamily: "var(--font-body)",
+            }}
+          >
+            {user.nickname}님
+          </span>
+          <button
+            onClick={logout}
+            style={{
+              padding: "4px 10px",
+              fontSize: 12,
+              color: "var(--color-text-muted)",
+              background: "none",
+              border: "1px solid var(--color-border)",
+              borderRadius: 6,
               cursor: "pointer",
             }}
           >
-            {s.title} {s.status === "closed" ? "(종료)" : "(진행중)"}
+            변경
           </button>
-        ))}
-      </section>
+        </div>
 
-      {/* Selected Session */}
-      {selectedSession && (
-        <section>
-          <h2>{selectedSession.title}</h2>
+        {/* Session Creation */}
+        <section style={{ marginBottom: 28 }}>
+          <h2
+            style={{
+              fontSize: 18,
+              fontFamily: "var(--font-heading)",
+              color: "var(--color-text)",
+              marginBottom: 12,
+            }}
+          >
+            새 투표 세션
+          </h2>
+          <div style={{ display: "flex", gap: 8 }}>
+            <input
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              placeholder="예: 금요일 점심"
+              onKeyDown={(e) => e.key === "Enter" && createSession()}
+              style={{
+                flex: 1,
+                padding: "10px 14px",
+                border: "2px solid var(--color-border)",
+                borderRadius: 10,
+                fontSize: 14,
+                background: "var(--color-surface)",
+                color: "var(--color-text)",
+                fontFamily: "var(--font-body)",
+                outline: "none",
+              }}
+            />
+            <button
+              onClick={createSession}
+              style={{
+                padding: "10px 20px",
+                fontWeight: 600,
+                background: "var(--color-primary)",
+                color: "#fff",
+                border: "none",
+                borderRadius: 10,
+                cursor: "pointer",
+                fontSize: 14,
+                fontFamily: "var(--font-body)",
+              }}
+            >
+              만들기
+            </button>
+          </div>
+        </section>
 
-          {/* Add Menu */}
-          {selectedSession.status === "open" && (
-            <div style={{ marginBottom: 16 }}>
-              <h3>메뉴 추가</h3>
-              <div style={{ display: "flex", gap: 8 }}>
-                <input
-                  value={newMenu}
-                  onChange={(e) => setNewMenu(e.target.value)}
-                  placeholder="메뉴 이름"
-                  onKeyDown={(e) => e.key === "Enter" && addMenuItem()}
-                  style={{ flex: 1, padding: 8 }}
-                />
-                <button onClick={addMenuItem} style={{ padding: "8px 16px" }}>
-                  추가
-                </button>
-              </div>
-            </div>
+        {/* Session List */}
+        <section style={{ marginBottom: 28 }}>
+          <h2
+            style={{
+              fontSize: 18,
+              fontFamily: "var(--font-heading)",
+              color: "var(--color-text)",
+              marginBottom: 12,
+            }}
+          >
+            세션 목록
+          </h2>
+          {sessions.length === 0 && (
+            <p
+              style={{
+                textAlign: "center",
+                color: "var(--color-text-muted)",
+                padding: 20,
+                fontSize: 14,
+              }}
+            >
+              세션이 없습니다. 새로 만들어보세요!
+            </p>
           )}
-
-          {/* Menu Items + Vote Buttons */}
-          <h3>메뉴 후보</h3>
-          {menuItems.length === 0 && <p>메뉴를 추가해주세요.</p>}
-          {menuItems.map((item) => {
-            const result = results.find((r) => r.menuItemId === item.id);
-            return (
-              <div
-                key={item.id}
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {sessions.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => selectSession(s)}
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  padding: 12,
-                  marginBottom: 4,
-                  background: "#f9f9f9",
-                  borderRadius: 4,
+                  width: "100%",
+                  padding: "14px 16px",
+                  textAlign: "left",
+                  background:
+                    selectedSession?.id === s.id
+                      ? "var(--color-secondary-light)"
+                      : "var(--color-surface)",
+                  border:
+                    selectedSession?.id === s.id
+                      ? "2px solid var(--color-secondary)"
+                      : "1px solid var(--color-border)",
+                  borderRadius: 10,
+                  cursor: "pointer",
+                  fontSize: 14,
+                  fontFamily: "var(--font-body)",
+                  color: "var(--color-text)",
+                  transition: "background 0.2s",
                 }}
               >
-                <span>
-                  {item.name} ({result?.count ?? 0}표)
+                <span style={{ fontWeight: 500 }}>{s.title}</span>
+                <span
+                  style={{
+                    fontSize: 12,
+                    padding: "2px 8px",
+                    borderRadius: 12,
+                    background:
+                      s.status === "closed"
+                        ? "var(--color-border)"
+                        : "var(--color-primary-light)",
+                    color:
+                      s.status === "closed"
+                        ? "var(--color-text-muted)"
+                        : "var(--color-primary)",
+                  }}
+                >
+                  {s.status === "closed" ? "종료" : "진행중"}
                 </span>
-                {selectedSession.status === "open" && (
-                  <button
-                    onClick={() => castVote(item.id)}
-                    style={{ padding: "6px 12px" }}
-                  >
-                    투표
-                  </button>
-                )}
-              </div>
-            );
-          })}
-
-          {/* Message */}
-          {message && (
-            <p style={{ marginTop: 12, color: message.includes("완료") ? "green" : "red" }}>
-              {message}
-            </p>
-          )}
-
-          {/* Close Session */}
-          {selectedSession.status === "open" && (
-            <button
-              onClick={closeSession}
-              style={{ marginTop: 16, padding: "8px 16px", background: "#fee2e2" }}
-            >
-              투표 종료
-            </button>
-          )}
+              </button>
+            ))}
+          </div>
         </section>
-      )}
+
+        {/* Selected Session */}
+        {selectedSession && (
+          <section
+            style={{
+              background: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
+              borderRadius: 12,
+              padding: 20,
+            }}
+          >
+            <h2
+              style={{
+                fontSize: 18,
+                fontFamily: "var(--font-heading)",
+                color: "var(--color-text)",
+                marginBottom: 16,
+              }}
+            >
+              {selectedSession.title}
+            </h2>
+
+            {/* Add Menu */}
+            {selectedSession.status === "open" && (
+              <div style={{ marginBottom: 16 }}>
+                <h3
+                  style={{
+                    fontSize: 15,
+                    color: "var(--color-text-muted)",
+                    marginBottom: 8,
+                    fontFamily: "var(--font-body)",
+                  }}
+                >
+                  메뉴 추가
+                </h3>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <input
+                    value={newMenu}
+                    onChange={(e) => setNewMenu(e.target.value)}
+                    placeholder="메뉴 이름"
+                    onKeyDown={(e) => e.key === "Enter" && addMenuItem()}
+                    style={{
+                      flex: 1,
+                      padding: "10px 14px",
+                      border: "1px solid var(--color-border)",
+                      borderRadius: 8,
+                      fontSize: 14,
+                      background: "var(--color-background)",
+                      color: "var(--color-text)",
+                      fontFamily: "var(--font-body)",
+                      outline: "none",
+                    }}
+                  />
+                  <button
+                    onClick={addMenuItem}
+                    style={{
+                      padding: "10px 16px",
+                      background: "var(--color-primary)",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: 8,
+                      cursor: "pointer",
+                      fontSize: 14,
+                      fontFamily: "var(--font-body)",
+                    }}
+                  >
+                    추가
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Menu Items */}
+            <h3
+              style={{
+                fontSize: 15,
+                color: "var(--color-text-muted)",
+                marginBottom: 8,
+                fontFamily: "var(--font-body)",
+              }}
+            >
+              메뉴 후보
+            </h3>
+            {menuItems.length === 0 && (
+              <p
+                style={{
+                  color: "var(--color-text-muted)",
+                  fontSize: 14,
+                  padding: "8px 0",
+                }}
+              >
+                메뉴를 추가해주세요.
+              </p>
+            )}
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              {menuItems.map((item) => {
+                const result = results.find((r) => r.menuItemId === item.id);
+                return (
+                  <div
+                    key={item.id}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "12px 14px",
+                      background: "var(--color-background)",
+                      borderRadius: 8,
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: 14,
+                        color: "var(--color-text)",
+                        fontFamily: "var(--font-body)",
+                      }}
+                    >
+                      {item.name}{" "}
+                      <span style={{ color: "var(--color-secondary)", fontWeight: 600 }}>
+                        ({result?.count ?? 0}표)
+                      </span>
+                    </span>
+                    {selectedSession.status === "open" && (
+                      <button
+                        onClick={() => castVote(item.id)}
+                        style={{
+                          padding: "6px 14px",
+                          background: "var(--color-accent)",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: 6,
+                          cursor: "pointer",
+                          fontSize: 13,
+                          fontWeight: 500,
+                          fontFamily: "var(--font-body)",
+                        }}
+                      >
+                        투표
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Message */}
+            {message && (
+              <p
+                style={{
+                  marginTop: 12,
+                  fontSize: 14,
+                  fontFamily: "var(--font-body)",
+                  color: message.includes("완료")
+                    ? "var(--color-primary)"
+                    : "var(--color-accent)",
+                }}
+              >
+                {message}
+              </p>
+            )}
+
+            {/* Close Session */}
+            {selectedSession.status === "open" && (
+              <button
+                onClick={closeSession}
+                style={{
+                  marginTop: 16,
+                  padding: "10px 20px",
+                  background: "var(--color-accent-light)",
+                  color: "var(--color-accent)",
+                  border: "1px solid var(--color-accent)",
+                  borderRadius: 8,
+                  cursor: "pointer",
+                  fontSize: 14,
+                  fontWeight: 500,
+                  fontFamily: "var(--font-body)",
+                }}
+              >
+                투표 종료
+              </button>
+            )}
+          </section>
+        )}
+      </main>
     </div>
   );
 }

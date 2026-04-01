@@ -1,13 +1,27 @@
+/* ===== Botanical Garden Theme (from theme.json) ===== */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  /* Core theme colors */
+  --color-primary: #4a7c59;
+  --color-secondary: #f9a620;
+  --color-accent: #b7472a;
+  --color-background: #f5f3ed;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Typography */
+  --font-heading: "Noto Serif", Georgia, serif;
+  --font-body: "Noto Sans", system-ui, sans-serif;
+
+  /* Semantic tokens */
+  --color-text: #2d3a2e;
+  --color-text-muted: #7a8a7c;
+  --color-surface: #ffffff;
+  --color-border: #d9d4cb;
+  --color-primary-light: #e8f0ea;
+  --color-secondary-light: #fef5e0;
+  --color-accent-light: #fceae5;
+
+  /* Legacy compat */
+  --background: var(--color-background);
+  --foreground: var(--color-text);
 }
 
 html {
@@ -24,9 +38,9 @@ body {
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--color-text);
+  background: var(--color-background);
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -42,8 +56,19 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

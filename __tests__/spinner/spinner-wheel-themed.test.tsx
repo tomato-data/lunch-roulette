@@ -8,7 +8,7 @@ const restaurants = [
   { id: 3, name: "스시로", category: "일식" },
 ];
 
-describe("SpinnerWheel", () => {
+describe("SpinnerWheel themed", () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -17,25 +17,24 @@ describe("SpinnerWheel", () => {
     vi.useRealTimers();
   });
 
-  it("renders all restaurant names on wheel", () => {
-    render(<SpinnerWheel items={restaurants} />);
-    restaurants.forEach((r) => {
-      expect(screen.getByText(r.name)).toBeDefined();
-    });
-  });
-
-  it("renders spin button", () => {
-    render(<SpinnerWheel items={restaurants} />);
-    expect(screen.getByText("돌리기!")).toBeDefined();
-  });
-
-  it("spin button click triggers spinning state", () => {
+  it("applies rotation transform on spin", () => {
     render(<SpinnerWheel items={restaurants} />);
     fireEvent.click(screen.getByText("돌리기!"));
-    expect(screen.getByText("돌리는 중...")).toBeDefined();
+
+    const wheel = screen.getByTestId("wheel");
+    const style = wheel.style.transform;
+    expect(style).toMatch(/rotate\(\d+(\.\d+)?deg\)/);
   });
 
-  it("displays result after spin completes", () => {
+  it("uses proper easing cubic-bezier for transition", () => {
+    render(<SpinnerWheel items={restaurants} />);
+    fireEvent.click(screen.getByText("돌리기!"));
+
+    const wheel = screen.getByTestId("wheel");
+    expect(wheel.style.transition).toContain("cubic-bezier");
+  });
+
+  it("shows result after transitionEnd event", () => {
     render(<SpinnerWheel items={restaurants} />);
     fireEvent.click(screen.getByText("돌리기!"));
 
@@ -46,11 +45,20 @@ describe("SpinnerWheel", () => {
     expect(screen.getByText("오늘의 점심은")).toBeDefined();
   });
 
-  it("spin button disabled during spinning", () => {
+  it("renders center hub element", () => {
+    render(<SpinnerWheel items={restaurants} />);
+    expect(screen.getByTestId("center-hub")).toBeDefined();
+  });
+
+  it("shows themed result display", () => {
     render(<SpinnerWheel items={restaurants} />);
     fireEvent.click(screen.getByText("돌리기!"));
-    const button = screen.getByText("돌리는 중...");
-    expect(button).toHaveProperty("disabled", true);
+
+    const wheel = screen.getByTestId("wheel");
+    fireEvent.transitionEnd(wheel);
+
+    const result = screen.getByTestId("result");
+    expect(result).toBeDefined();
   });
 
   it("shows empty message when no restaurants", () => {

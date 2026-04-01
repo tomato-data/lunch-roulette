@@ -5,6 +5,7 @@ import { vi } from "vitest";
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
   useParams: () => ({ id: "1" }),
+  usePathname: () => "/restaurants/1",
 }));
 
 // Mock next/link

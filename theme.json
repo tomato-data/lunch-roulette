@@ -1,0 +1,15 @@
+{
+  "name": "Botanical Garden",
+  "description": "A fresh and organic theme featuring vibrant garden-inspired colors for lively presentations",
+  "colors": {
+    "primary": "#4a7c59",
+    "secondary": "#f9a620",
+    "accent": "#b7472a",
+    "background": "#f5f3ed"
+  },
+  "fonts": {
+    "heading": "DejaVu Serif Bold",
+    "body": "DejaVu Sans"
+  },
+  "bestFor": "Garden centers, food presentations, natural products"
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import Navigation from "@/app/components/navigation";
 import SpinnerWheel from "./spinner-wheel";
 
 interface Restaurant {
@@ -29,30 +29,69 @@ export default function SpinnerPage() {
   }, []);
 
   return (
-    <div style={{ maxWidth: 600, margin: "0 auto", padding: 20, fontFamily: "sans-serif" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-        <h1 style={{ margin: 0 }}>Lunch Roulette</h1>
-        <div style={{ display: "flex", gap: 8 }}>
-          <Link
-            href="/"
-            style={{ padding: "8px 16px", background: "#f0f0f0", borderRadius: 6, textDecoration: "none", color: "#333", fontSize: 14 }}
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "var(--color-background)",
+      }}
+    >
+      <Navigation />
+      <main
+        style={{
+          maxWidth: 640,
+          margin: "0 auto",
+          padding: "40px 20px",
+        }}
+      >
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          <h2
+            style={{
+              fontSize: 28,
+              fontWeight: 700,
+              fontFamily: "var(--font-heading)",
+              color: "var(--color-text)",
+              margin: 0,
+            }}
           >
-            투표 페이지
-          </Link>
-          <Link
-            href="/restaurants"
-            style={{ padding: "8px 16px", background: "#f0f0f0", borderRadius: 6, textDecoration: "none", color: "#333", fontSize: 14 }}
+            오늘 뭐 먹지?
+          </h2>
+          <p
+            style={{
+              color: "var(--color-text-muted)",
+              fontSize: 15,
+              marginTop: 8,
+              fontFamily: "var(--font-body)",
+            }}
           >
-            식당 관리
-          </Link>
+            룰렛을 돌려 점심 메뉴를 정해보세요
+          </p>
         </div>
-      </div>
 
-      {loading ? (
-        <p style={{ textAlign: "center", color: "#9ca3af" }}>로딩 중...</p>
-      ) : (
-        <SpinnerWheel items={restaurants} />
-      )}
+        {loading ? (
+          <div
+            style={{
+              textAlign: "center",
+              padding: 60,
+              color: "var(--color-primary)",
+            }}
+          >
+            <div
+              style={{
+                width: 40,
+                height: 40,
+                border: "4px solid var(--color-border)",
+                borderTop: "4px solid var(--color-primary)",
+                borderRadius: "50%",
+                margin: "0 auto 16px",
+                animation: "spin 0.8s linear infinite",
+              }}
+            />
+            로딩 중...
+          </div>
+        ) : (
+          <SpinnerWheel items={restaurants} />
+        )}
+      </main>
     </div>
   );
 }

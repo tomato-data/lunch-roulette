@@ -332,4 +332,8 @@
 - `menu_items.name` 컬럼은 유지하되, restaurant.name으로 자동 채워지는 구조 (or 제거 후 JOIN으로 해결)
 - 기존 menu_items 데이터는 마이그레이션 불필요 (아직 실사용 데이터 없음)
 - LIKE 검색은 `%query%` 패턴 사용, SQLite는 한글 LIKE 기본 지원
-- debounce는 프론트에서 처리 (300ms 권장)
+- debounce는 프론트에서 처리 (500ms)
+- `revealAt` default = 당일 12:55 KST (Asia/Seoul). DB에는 ISO string으로 저장
+- 방문 확정 플로우: 투표 당첨 → 확정 대기 → 사용자가 "다녀왔어요" 클릭 → winCount +1 + lunch_history 기록
+- `lunch_history` 테이블: sessionId, restaurantId, visitedAt(date)
+- 세션 목록 페이지네이션: page query param, 5개/페이지, 최신순

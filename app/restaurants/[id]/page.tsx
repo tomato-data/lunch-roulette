@@ -35,7 +35,16 @@ export default function RestaurantDetailPage() {
   const [selectedRating, setSelectedRating] = useState(0);
   const [content, setContent] = useState("");
   const userId =
-    typeof window !== "undefined" ? localStorage.getItem("userId") : null;
+    typeof window !== "undefined"
+      ? (() => {
+          try {
+            const stored = localStorage.getItem("lunch-roulette-user");
+            return stored ? JSON.parse(stored).id : null;
+          } catch {
+            return null;
+          }
+        })()
+      : null;
 
   const myReview = reviews.find((r) => r.userId === userId);
 

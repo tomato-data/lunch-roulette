@@ -54,12 +54,12 @@ function setupFetch(options?: { restaurant?: typeof mockRestaurant; reviews?: ty
     return Promise.resolve({ ok: false });
   });
 
-  // mock localStorage for userId
+  // mock localStorage for userId (matches main page's "lunch-roulette-user" key)
   const userId = options?.userId ?? "u1";
   Object.defineProperty(window, "localStorage", {
     value: {
       getItem: vi.fn((key: string) => {
-        if (key === "userId") return userId;
+        if (key === "lunch-roulette-user") return JSON.stringify({ id: userId, nickname: "테스트" });
         return null;
       }),
       setItem: vi.fn(),

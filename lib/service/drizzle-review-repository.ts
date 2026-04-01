@@ -1,4 +1,4 @@
-import { eq, and, sql, avg } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 import { reviews, users } from "@/drizzle/schema";
 import type { ReviewRepository, ReviewRecord, UpsertReviewInput } from "./review-repository";
@@ -11,7 +11,13 @@ export class DrizzleReviewRepository implements ReviewRepository {
     const existing = this.db
       .select({ id: reviews.id })
       .from(reviews)
-      .where(and(eq(reviews.restaurantId, input.restaurantId), eq(reviews.userId, input.userId)))
+      .where(
+        and(
+          eq(reviews.restaurantId, input.restaurantId),
+          eq(reviews.userId, input.userId),
+          eq(reviews.reviewDate, input.reviewDate),
+        )
+      )
       .get();
 
     if (existing) {
@@ -32,12 +38,13 @@ export class DrizzleReviewRepository implements ReviewRepository {
           userId: input.userId,
           rating: input.rating ?? null,
           content: input.content ?? null,
+          reviewDate: input.reviewDate,
         })
         .run();
     }
   }
 
-  async getReview(restaurantId: number, userId: string): Promise<ReviewRecord | null> {
+  async getReviewByDate(restaurantId: number, userId: string, reviewDate: string): Promise<ReviewRecord | null> {
     const row = this.db
       .select({
         id: reviews.id,
@@ -46,12 +53,19 @@ export class DrizzleReviewRepository implements ReviewRepository {
         nickname: users.nickname,
         rating: reviews.rating,
         content: reviews.content,
+        reviewDate: reviews.reviewDate,
         createdAt: reviews.createdAt,
         updatedAt: reviews.updatedAt,
       })
       .from(reviews)
       .innerJoin(users, eq(reviews.userId, users.id))
-      .where(and(eq(reviews.restaurantId, restaurantId), eq(reviews.userId, userId)))
+      .where(
+        and(
+          eq(reviews.restaurantId, restaurantId),
+          eq(reviews.userId, userId),
+          eq(reviews.reviewDate, reviewDate),
+        )
+      )
       .get();
     return row ?? null;
   }
@@ -65,12 +79,14 @@ export class DrizzleReviewRepository implements ReviewRepository {
         nickname: users.nickname,
         rating: reviews.rating,
         content: reviews.content,
+        reviewDate: reviews.reviewDate,
         createdAt: reviews.createdAt,
         updatedAt: reviews.updatedAt,
       })
       .from(reviews)
       .innerJoin(users, eq(reviews.userId, users.id))
       .where(eq(reviews.restaurantId, restaurantId))
+      .orderBy(sql`${reviews.reviewDate} DESC`)
       .all();
   }
 
@@ -83,10 +99,16 @@ export class DrizzleReviewRepository implements ReviewRepository {
     return result?.avg ? Math.round(result.avg * 10) / 10 : null;
   }
 
-  async deleteReview(restaurantId: number, userId: string): Promise<void> {
+  async deleteReview(restaurantId: number, userId: string, reviewDate: string): Promise<void> {
     this.db
       .delete(reviews)
-      .where(and(eq(reviews.restaurantId, restaurantId), eq(reviews.userId, userId)))
+      .where(
+        and(
+          eq(reviews.restaurantId, restaurantId),
+          eq(reviews.userId, userId),
+          eq(reviews.reviewDate, reviewDate),
+        )
+      )
       .run();
   }
 }

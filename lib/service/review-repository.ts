@@ -5,6 +5,7 @@ export interface ReviewRecord {
   nickname: string;
   rating: number | null;
   content: string | null;
+  reviewDate: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -14,12 +15,13 @@ export interface UpsertReviewInput {
   userId: string;
   rating?: number;
   content?: string;
+  reviewDate: string;
 }
 
 export interface ReviewRepository {
   upsertReview(input: UpsertReviewInput): Promise<void>;
-  getReview(restaurantId: number, userId: string): Promise<ReviewRecord | null>;
+  getReviewByDate(restaurantId: number, userId: string, reviewDate: string): Promise<ReviewRecord | null>;
   getReviewsByRestaurant(restaurantId: number): Promise<ReviewRecord[]>;
   getAverageRating(restaurantId: number): Promise<number | null>;
-  deleteReview(restaurantId: number, userId: string): Promise<void>;
+  deleteReview(restaurantId: number, userId: string, reviewDate: string): Promise<void>;
 }

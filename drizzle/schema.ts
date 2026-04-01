@@ -51,6 +51,9 @@ export const reviews = sqliteTable("reviews", {
     .references(() => users.id),
   rating: integer("rating"),
   content: text("content"),
+  reviewDate: text("review_date")
+    .notNull()
+    .$defaultFn(() => new Date().toISOString().slice(0, 10)),
   createdAt: text("created_at")
     .notNull()
     .$defaultFn(() => new Date().toISOString()),

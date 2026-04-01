@@ -6,11 +6,17 @@ interface CreateOrUpdateReviewInput {
   userId: string;
   rating?: number;
   content?: string;
+  reviewDate?: string;
 }
 
 interface DeleteReviewInput {
   restaurantId: number;
   userId: string;
+  reviewDate?: string;
+}
+
+function today(): string {
+  return new Date().toISOString().slice(0, 10);
 }
 
 export class ReviewService {
@@ -25,11 +31,14 @@ export class ReviewService {
       Rating.create(input.rating);
     }
 
+    const reviewDate = input.reviewDate ?? today();
+
     await this.repo.upsertReview({
       restaurantId: input.restaurantId,
       userId: input.userId,
       rating: input.rating,
       content: input.content,
+      reviewDate,
     });
   }
 
@@ -42,6 +51,7 @@ export class ReviewService {
   }
 
   async deleteReview(input: DeleteReviewInput): Promise<void> {
-    await this.repo.deleteReview(input.restaurantId, input.userId);
+    const reviewDate = input.reviewDate ?? today();
+    await this.repo.deleteReview(input.restaurantId, input.userId, reviewDate);
   }
 }

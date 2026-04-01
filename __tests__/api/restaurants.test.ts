@@ -19,11 +19,14 @@ function createTestDb() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT NOT NULL,
       status TEXT NOT NULL DEFAULT 'open',
+      reveal_at TEXT,
+      confirmed_at TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
     CREATE TABLE menu_items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       session_id INTEGER NOT NULL REFERENCES vote_sessions(id),
+      restaurant_id INTEGER REFERENCES restaurants(id),
       name TEXT NOT NULL
     );
     CREATE TABLE votes (
@@ -39,6 +42,7 @@ function createTestDb() {
       category TEXT,
       description TEXT,
       photo_path TEXT,
+      win_count INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );

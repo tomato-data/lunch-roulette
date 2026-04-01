@@ -45,11 +45,11 @@ describe("VoteService", () => {
     ).rejects.toThrowError("이미 투표하셨습니다");
   });
 
-  it("should return vote counts per menu item", async () => {
+  it("should return vote counts with restaurant info", async () => {
     const repo = createFakeRepository({
       getResults: async () => [
-        { menuItemId: 1, menuName: "김치찌개", count: 3 },
-        { menuItemId: 2, menuName: "된장찌개", count: 1 },
+        { menuItemId: 1, menuName: "김치찌개집", category: "한식", count: 3 },
+        { menuItemId: 2, menuName: "스시야", category: "일식", count: 1 },
       ],
     });
     const service = new VoteService(repo);
@@ -57,8 +57,8 @@ describe("VoteService", () => {
     const results = await service.getResults(1);
 
     expect(results).toEqual([
-      { menuItemId: 1, menuName: "김치찌개", count: 3 },
-      { menuItemId: 2, menuName: "된장찌개", count: 1 },
+      { menuItemId: 1, menuName: "김치찌개집", category: "한식", count: 3 },
+      { menuItemId: 2, menuName: "스시야", category: "일식", count: 1 },
     ]);
   });
 });

@@ -1,6 +1,6 @@
 import { eq, and, sql } from "drizzle-orm";
 import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
-import { voteSessions, menuItems, votes } from "@/drizzle/schema";
+import { voteSessions, menuItems, votes, restaurants } from "@/drizzle/schema";
 import type { VoteRepository, VoteResult } from "./vote-repository";
 import * as schema from "@/drizzle/schema";
 
@@ -43,10 +43,12 @@ export class DrizzleVoteRepository implements VoteRepository {
       .select({
         menuItemId: votes.menuItemId,
         menuName: menuItems.name,
+        category: restaurants.category,
         count: sql<number>`count(*)`,
       })
       .from(votes)
       .innerJoin(menuItems, eq(votes.menuItemId, menuItems.id))
+      .innerJoin(restaurants, eq(menuItems.restaurantId, restaurants.id))
       .where(eq(votes.sessionId, sessionId))
       .groupBy(votes.menuItemId)
       .all();

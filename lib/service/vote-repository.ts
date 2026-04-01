@@ -1,6 +1,7 @@
 export interface VoteResult {
   menuItemId: number;
   menuName: string;
+  category: string | null;
   count: number;
 }
 

@@ -4,7 +4,8 @@
 
 **도메인**: lunch/vote
 **생성일**: 2026-04-01
-**상태**: IN_PROGRESS
+**상태**: ~~IN_PROGRESS~~ COMPLETED
+**완료일**: 2026-04-01
 
 ---
 
@@ -156,122 +157,122 @@
 
 **단위 테스트** (`__tests__/api/restaurant-search.test.ts`)
 
-- [ ] `GET /api/restaurants/search?q=카츠` → 카츠올로지, 카츠올로지 옆 반환
-- [ ] `GET /api/restaurants/search?q=` (빈 쿼리) → 빈 배열 반환
-- [ ] `GET /api/restaurants/search?q=없는식당` → 빈 배열 반환
-- [ ] `GET /api/restaurants/search?q=밥` → 밥온 반환 (부분 매칭)
+- [x] `GET /api/restaurants/search?q=카츠` → 카츠올로지, 카츠올로지 옆 반환
+- [x] `GET /api/restaurants/search?q=` (빈 쿼리) → 빈 배열 반환
+- [x] `GET /api/restaurants/search?q=없는식당` → 빈 배열 반환
+- [x] `GET /api/restaurants/search?q=밥` → 밥온 반환 (부분 매칭)
 
 **통합 체크** (Phase 완료 시)
 
-- [ ] 실제 DB에 시드 데이터 넣고 LIKE 검색 결과 확인
-- [ ] 응답 형태: `{ id, name, category }[]`
+- [x] 실제 DB에 시드 데이터 넣고 LIKE 검색 결과 확인
+- [x] 응답 형태: `{ id, name, category }[]`
 
 ### Phase 2: 세션에 음식점 추가 (menu_items → restaurant 연동)
 
 **단위 테스트** (`__tests__/api/sessions.test.ts` 수정)
 
-- [ ] `POST /sessions/[id]/menu` with `{ restaurantId }` → 201, 음식점 정보 포함 응답
-- [ ] `POST /sessions/[id]/menu` with 존재하지 않는 restaurantId → 404
-- [ ] `POST /sessions/[id]/menu` with 이미 추가된 restaurantId → 409 (중복 방지)
-- [ ] `GET /sessions/[id]/menu` → 음식점 이름·카테고리 포함 목록 반환
+- [x] `POST /sessions/[id]/menu` with `{ restaurantId }` → 201, 음식점 정보 포함 응답
+- [x] `POST /sessions/[id]/menu` with 존재하지 않는 restaurantId → 404
+- [x] `POST /sessions/[id]/menu` with 이미 추가된 restaurantId → 409 (중복 방지)
+- [x] `GET /sessions/[id]/menu` → 음식점 이름·카테고리 포함 목록 반환
 
 **통합 체크** (Phase 완료 시)
 
-- [ ] menu_items 테이블에 restaurant_id FK 정상 저장 확인
-- [ ] 기존 sessions.test.ts의 메뉴 관련 테스트 전부 수정 완료
-- [ ] `npm run test` 전체 통과
+- [x] menu_items 테이블에 restaurant_id FK 정상 저장 확인
+- [x] 기존 sessions.test.ts의 메뉴 관련 테스트 전부 수정 완료
+- [x] `npm run test` 전체 통과
 
 ### Phase 3: 투표 결과에 음식점 정보 반영
 
 **단위 테스트** (`__tests__/service/vote-service.test.ts` 수정)
 
-- [ ] `VoteService.castVote()` — 정상 투표 (기존 로직 유지, restaurantId 기반)
-- [ ] `VoteService.getResults()` — 결과에 음식점 name, category 포함
-- [ ] 기존 중복 투표·세션 종료 검증 유지
+- [x] `VoteService.castVote()` — 정상 투표 (기존 로직 유지, restaurantId 기반)
+- [x] `VoteService.getResults()` — 결과에 음식점 name, category 포함
+- [x] 기존 중복 투표·세션 종료 검증 유지
 
 **통합 체크** (Phase 완료 시)
 
-- [ ] `GET /sessions/[id]/results` 응답에 `restaurantName`, `category` 포함
-- [ ] vote-service.test.ts, vote-repository 인터페이스 수정 완료
-- [ ] `npm run test` 전체 통과
+- [x] `GET /sessions/[id]/results` 응답에 `restaurantName`, `category` 포함
+- [x] vote-service.test.ts, vote-repository 인터페이스 수정 완료
+- [x] `npm run test` 전체 통과
 
 ### Phase 4: 개봉 시간 (revealAt) 로직
 
 **단위 테스트**
 
-- [ ] `VoteSession.create()` — `revealAt` 미지정 시 당일 12:55 KST 기본값
-- [ ] `VoteSession.create()` — `revealAt` 지정 시 해당 시간 저장
-- [ ] `VoteSession.isRevealed()` — 현재 시간 < revealAt → false
-- [ ] `VoteSession.isRevealed()` — 현재 시간 >= revealAt → true
+- [x] `VoteSession.create()` — `revealAt` 미지정 시 당일 12:55 KST 기본값
+- [x] `VoteSession.create()` — `revealAt` 지정 시 해당 시간 저장
+- [x] `VoteSession.isRevealed()` — 현재 시간 < revealAt → false
+- [x] `VoteSession.isRevealed()` — 현재 시간 >= revealAt → true
 
 **통합 테스트** (`__tests__/api/sessions.test.ts` 수정)
 
-- [ ] `POST /sessions` — revealAt 포함하여 세션 생성, DB 저장 확인
-- [ ] `GET /sessions/[id]/results` — revealAt 이전 요청 시 결과 비공개 (403 or 빈 응답)
-- [ ] `GET /sessions/[id]/results` — revealAt 이후 요청 시 당첨 결과 공개
-- [ ] 프론트: 개봉 시간 전에는 투표 수 숨김, 이후에 당첨 결과 표시
+- [x] `POST /sessions` — revealAt 포함하여 세션 생성, DB 저장 확인
+- [x] `GET /sessions/[id]/results` — revealAt 이전 요청 시 결과 비공개 (403 or 빈 응답)
+- [x] `GET /sessions/[id]/results` — revealAt 이후 요청 시 당첨 결과 공개
+- [x] 프론트: 개봉 시간 전에는 투표 수 숨김, 이후에 당첨 결과 표시
 
 **통합 체크** (Phase 완료 시)
 
-- [ ] `vote_sessions` 테이블에 `reveal_at` 컬럼 추가 확인
-- [ ] 기존 세션 생성 테스트 수정 완료
-- [ ] `npm run test` 전체 통과
+- [x] `vote_sessions` 테이블에 `reveal_at` 컬럼 추가 확인
+- [x] 기존 세션 생성 테스트 수정 완료
+- [x] `npm run test` 전체 통과
 
 ### Phase 5: 방문 확정 & win count
 
 **단위 테스트**
 
-- [ ] `POST /sessions/[id]/confirm` — 당첨 음식점 방문 확정 → `restaurants.winCount +1`
-- [ ] `POST /sessions/[id]/confirm` — 이미 확정된 세션 재확정 시 409
-- [ ] `POST /sessions/[id]/confirm` — revealAt 이전 확정 시도 → 400
-- [ ] `restaurants` 테이블에 `winCount` 컬럼 추가, 기본값 0
+- [x] `POST /sessions/[id]/confirm` — 당첨 음식점 방문 확정 → `restaurants.winCount +1`
+- [x] `POST /sessions/[id]/confirm` — 이미 확정된 세션 재확정 시 409
+- [x] `POST /sessions/[id]/confirm` — revealAt 이전 확정 시도 → 400
+- [x] `restaurants` 테이블에 `winCount` 컬럼 추가, 기본값 0
 
 **통합 테스트**
 
-- [ ] 확정 시 `lunch_history` 테이블에 날짜 + 음식점 기록 저장
-- [ ] `GET /api/lunch-history` — 날짜별 방문 기록 조회
+- [x] 확정 시 `lunch_history` 테이블에 날짜 + 음식점 기록 저장
+- [x] `GET /api/lunch-history` — 날짜별 방문 기록 조회
 
 **통합 체크** (Phase 완료 시)
 
-- [ ] `restaurants.win_count` 컬럼 정상 동작
-- [ ] `lunch_history` 테이블 생성 및 데이터 저장 확인
-- [ ] `npm run test` 전체 통과
+- [x] `restaurants.win_count` 컬럼 정상 동작
+- [x] `lunch_history` 테이블 생성 및 데이터 저장 확인
+- [x] `npm run test` 전체 통과
 
 ### Phase 6: 세션 목록 페이지네이션
 
 **단위 테스트** (`__tests__/api/sessions.test.ts` 수정)
 
-- [ ] `GET /sessions?page=1` → 최신 5개 세션 반환
-- [ ] `GET /sessions?page=2` → 다음 5개 세션 반환
-- [ ] `GET /sessions` (page 미지정) → 기본 page=1
-- [ ] 응답에 `totalCount`, `totalPages`, `currentPage` 포함
+- [x] `GET /sessions?page=1` → 최신 5개 세션 반환
+- [x] `GET /sessions?page=2` → 다음 5개 세션 반환
+- [x] `GET /sessions` (page 미지정) → 기본 page=1
+- [x] 응답에 `totalCount`, `totalPages`, `currentPage` 포함
 
 **통합 체크** (Phase 완료 시)
 
-- [ ] 프론트: 페이지 이동 UI (이전/다음) 동작 확인
-- [ ] 기존 세션 목록 테스트 수정 완료
-- [ ] `npm run test` 전체 통과
+- [x] 프론트: 페이지 이동 UI (이전/다음) 동작 확인
+- [x] 기존 세션 목록 테스트 수정 완료
+- [x] `npm run test` 전체 통과
 
 ### Phase 7: 프론트엔드 Autocomplete UI
 
 **단위 테스트** (`__tests__/components/restaurant-autocomplete.test.tsx`)
 
-- [ ] 텍스트 입력 시 debounce 0.5초 후 `/api/restaurants/search?q=` 호출
-- [ ] 검색 결과 드롭다운에 음식점 목록 표시 (이름 + 카테고리)
-- [ ] 항목 클릭 시 선택 콜백 호출 (restaurantId 전달)
-- [ ] 입력 비우면 드롭다운 숨김
+- [x] 텍스트 입력 시 debounce 0.5초 후 `/api/restaurants/search?q=` 호출
+- [x] 검색 결과 드롭다운에 음식점 목록 표시 (이름 + 카테고리)
+- [x] 항목 클릭 시 선택 콜백 호출 (restaurantId 전달)
+- [x] 입력 비우면 드롭다운 숨김
 
 **통합 체크** (Phase 완료 시)
 
-- [ ] app/page.tsx에서 Autocomplete 컴포넌트 사용 확인
-- [ ] 기존 자유 텍스트 입력 제거, autocomplete로 교체
-- [ ] 선택 → 세션 추가 → 투표 → 결과(개봉 시간 후) → 방문 확정 전체 플로우 동작
-- [ ] `npm run test` 전체 통과
+- [x] app/page.tsx에서 Autocomplete 컴포넌트 사용 확인
+- [x] 기존 자유 텍스트 입력 제거, autocomplete로 교체
+- [x] 선택 → 세션 추가 → 투표 → 결과(개봉 시간 후) → 방문 확정 전체 플로우 동작
+- [x] `npm run test` 전체 통과
 
 ### Phase 8: Feature Documentation
 
-- [ ] 기능 문서 업데이트 (`docs/features/lunch/vote.md`)
-- [ ] `docs/features/index.md`에 변경 사항 반영
+- [x] 기능 문서 업데이트 (`docs/features/lunch/vote.md`)
+- [x] `docs/features/index.md`에 변경 사항 반영
 
 ---
 
@@ -279,14 +280,14 @@
 
 | Phase | 단위 | 통합 | 전체 | 진행률 |
 |-------|------|------|------|--------|
-| Phase 1: 음식점 검색 API | 0/4 | 0/2 | 0/6 | 0% |
-| Phase 2: 세션-음식점 연동 | 0/4 | 0/3 | 0/7 | 0% |
-| Phase 3: 투표 결과 음식점 반영 | 0/3 | 0/3 | 0/6 | 0% |
-| Phase 4: 개봉 시간 (revealAt) | 0/4 | 0/4 | 0/8 | 0% |
-| Phase 5: 방문 확정 & win count | 0/4 | 0/2 | 0/6 | 0% |
-| Phase 6: 세션 목록 페이지네이션 | 0/4 | 0/3 | 0/7 | 0% |
-| Phase 7: 프론트엔드 Autocomplete | 0/4 | 0/4 | 0/8 | 0% |
-| Phase 8: Feature Documentation | 0/2 | — | 0/2 | 0% |
+| Phase 1: 음식점 검색 API | 4/4 | 2/2 | 6/6 | 100% |
+| Phase 2: 세션-음식점 연동 | 4/4 | 3/3 | 7/7 | 100% |
+| Phase 3: 투표 결과 음식점 반영 | 3/3 | 3/3 | 6/6 | 100% |
+| Phase 4: 개봉 시간 (revealAt) | 4/4 | 4/4 | 8/8 | 100% |
+| Phase 5: 방문 확정 & win count | 4/4 | 2/2 | 6/6 | 100% |
+| Phase 6: 세션 목록 페이지네이션 | 4/4 | 3/3 | 7/7 | 100% |
+| Phase 7: 프론트엔드 Autocomplete | 4/4 | 4/4 | 8/8 | 100% |
+| Phase 8: Feature Documentation | 2/2 | — | 2/2 | 100% |
 
 ---
 

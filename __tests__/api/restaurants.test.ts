@@ -48,6 +48,7 @@ function createTestDb() {
       user_id TEXT NOT NULL REFERENCES users(id),
       rating INTEGER,
       content TEXT,
+      review_date TEXT NOT NULL DEFAULT (date('now')),
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );

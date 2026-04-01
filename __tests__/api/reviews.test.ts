@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import * as schema from "@/drizzle/schema";
@@ -47,6 +47,7 @@ function createTestDb() {
       user_id TEXT NOT NULL REFERENCES users(id),
       rating INTEGER,
       content TEXT,
+      review_date TEXT NOT NULL DEFAULT (date('now')),
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
@@ -65,6 +66,9 @@ describe("Review API Route Handlers", () => {
   let userId: string;
 
   beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-04-01T12:00:00Z"));
+
     const testDb = createTestDb();
     db = testDb.db;
     sqlite = testDb.sqlite;
@@ -78,13 +82,14 @@ describe("Review API Route Handlers", () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     resetDb();
     sqlite.close();
   });
 
   describe("GET /api/restaurants/[id]/reviews", () => {
     it("should return reviews list with average rating", async () => {
-      db.insert(schema.reviews).values({ restaurantId, userId: "user-1", rating: 4, content: "좋아요" }).run();
+      db.insert(schema.reviews).values({ restaurantId, userId: "user-1", rating: 4, content: "좋아요", reviewDate: "2026-04-01" }).run();
 
       const req = new Request(`http://localhost/api/restaurants/${restaurantId}/reviews`);
       const res = await GET(req, makeParams(String(restaurantId)));
@@ -95,7 +100,20 @@ describe("Review API Route Handlers", () => {
       expect(body.reviews[0].rating).toBe(4);
       expect(body.reviews[0].content).toBe("좋아요");
       expect(body.reviews[0].nickname).toBe("앨리스");
+      expect(body.reviews[0].reviewDate).toBe("2026-04-01");
       expect(body.avgRating).toBe(4);
+    });
+
+    it("should return multiple reviews from different dates", async () => {
+      db.insert(schema.reviews).values({ restaurantId, userId: "user-1", rating: 4, content: "오늘", reviewDate: "2026-04-01" }).run();
+      db.insert(schema.reviews).values({ restaurantId, userId: "user-1", rating: 3, content: "어제", reviewDate: "2026-03-31" }).run();
+
+      const req = new Request(`http://localhost/api/restaurants/${restaurantId}/reviews`);
+      const res = await GET(req, makeParams(String(restaurantId)));
+
+      const body = await res.json();
+      expect(body.reviews).toHaveLength(2);
+      expect(body.avgRating).toBe(3.5);
     });
   });
 
@@ -113,15 +131,15 @@ describe("Review API Route Handlers", () => {
       const body = await res.json();
       expect(body.rating).toBe(5);
       expect(body.content).toBe("최고에요");
+      expect(body.reviewDate).toBe("2026-04-01");
     });
 
-    it("should upsert when same user reviews again", async () => {
-      // first review
-      db.insert(schema.reviews).values({ restaurantId, userId, rating: 3, content: "보통" }).run();
+    it("should upsert when same user reviews again on same day", async () => {
+      db.insert(schema.reviews).values({ restaurantId, userId, rating: 3, content: "보통", reviewDate: "2026-04-01" }).run();
 
       const req = new Request(`http://localhost/api/restaurants/${restaurantId}/reviews`, {
         method: "POST",
-        body: JSON.stringify({ userId, rating: 5, content: "다시 와보니 최고" }),
+        body: JSON.stringify({ userId, rating: 5, content: "다시 생각해보니 최고" }),
         headers: { "Content-Type": "application/json" },
       });
 
@@ -130,13 +148,29 @@ describe("Review API Route Handlers", () => {
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body.rating).toBe(5);
-      expect(body.content).toBe("다시 와보니 최고");
+      expect(body.content).toBe("다시 생각해보니 최고");
+    });
 
-      // verify only 1 review exists
+    it("should create new review on different day (not upsert)", async () => {
+      // yesterday's review
+      db.insert(schema.reviews).values({ restaurantId, userId, rating: 3, content: "어제", reviewDate: "2026-03-31" }).run();
+
+      // today's new review
+      const req = new Request(`http://localhost/api/restaurants/${restaurantId}/reviews`, {
+        method: "POST",
+        body: JSON.stringify({ userId, rating: 5, content: "오늘은 최고" }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const res = await POST(req, makeParams(String(restaurantId)));
+
+      expect(res.status).toBe(201);
+
+      // verify 2 reviews exist
       const getReq = new Request(`http://localhost/api/restaurants/${restaurantId}/reviews`);
       const getRes = await GET(getReq, makeParams(String(restaurantId)));
       const getBody = await getRes.json();
-      expect(getBody.reviews).toHaveLength(1);
+      expect(getBody.reviews).toHaveLength(2);
     });
 
     it("should return 400 when neither rating nor content", async () => {
@@ -189,8 +223,8 @@ describe("Review API Route Handlers", () => {
   });
 
   describe("DELETE /api/restaurants/[id]/reviews", () => {
-    it("should delete user's review", async () => {
-      db.insert(schema.reviews).values({ restaurantId, userId, rating: 4 }).run();
+    it("should delete today's review", async () => {
+      db.insert(schema.reviews).values({ restaurantId, userId, rating: 4, reviewDate: "2026-04-01" }).run();
 
       const req = new Request(`http://localhost/api/restaurants/${restaurantId}/reviews`, {
         method: "DELETE",
@@ -203,7 +237,10 @@ describe("Review API Route Handlers", () => {
       expect(res.status).toBe(200);
     });
 
-    it("should return 404 when no review to delete", async () => {
+    it("should return 404 when no today's review to delete", async () => {
+      // yesterday's review exists, but not today's
+      db.insert(schema.reviews).values({ restaurantId, userId, rating: 4, reviewDate: "2026-03-31" }).run();
+
       const req = new Request(`http://localhost/api/restaurants/${restaurantId}/reviews`, {
         method: "DELETE",
         body: JSON.stringify({ userId }),

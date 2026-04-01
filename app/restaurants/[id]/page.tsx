@@ -21,6 +21,7 @@ interface Review {
   nickname: string;
   rating: number | null;
   content: string | null;
+  reviewDate: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -46,7 +47,8 @@ export default function RestaurantDetailPage() {
         })()
       : null;
 
-  const myReview = reviews.find((r) => r.userId === userId);
+  const today = new Date().toISOString().slice(0, 10);
+  const myTodayReview = reviews.find((r) => r.userId === userId && r.reviewDate === today);
 
   useEffect(() => {
     fetchRestaurant();
@@ -54,11 +56,11 @@ export default function RestaurantDetailPage() {
   }, [id]);
 
   useEffect(() => {
-    if (myReview) {
-      setSelectedRating(myReview.rating ?? 0);
-      setContent(myReview.content ?? "");
+    if (myTodayReview) {
+      setSelectedRating(myTodayReview.rating ?? 0);
+      setContent(myTodayReview.content ?? "");
     }
-  }, [myReview?.id]);
+  }, [myTodayReview?.id]);
 
   async function fetchRestaurant() {
     const res = await fetch(`/api/restaurants/${id}`);
@@ -265,7 +267,7 @@ export default function RestaurantDetailPage() {
                 color: "var(--color-text)",
               }}
             >
-              {myReview ? "내 리뷰 수정" : "리뷰 작성"}
+              {myTodayReview ? "오늘 리뷰 수정" : "오늘의 리뷰 작성"}
             </h3>
             <div style={{ marginBottom: 14 }}>
               <span
@@ -335,9 +337,9 @@ export default function RestaurantDetailPage() {
                   fontFamily: "var(--font-body)",
                 }}
               >
-                {myReview ? "리뷰 수정" : "리뷰 등록"}
+                {myTodayReview ? "리뷰 수정" : "리뷰 등록"}
               </button>
-              {myReview && (
+              {myTodayReview && (
                 <button
                   onClick={handleDeleteReview}
                   style={{
@@ -405,15 +407,26 @@ export default function RestaurantDetailPage() {
                     marginBottom: 8,
                   }}
                 >
-                  <span
-                    style={{
-                      fontWeight: 600,
-                      fontSize: 14,
-                      color: "var(--color-text)",
-                      fontFamily: "var(--font-body)",
-                    }}
-                  >
-                    {review.nickname}
+                  <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span
+                      style={{
+                        fontWeight: 600,
+                        fontSize: 14,
+                        color: "var(--color-text)",
+                        fontFamily: "var(--font-body)",
+                      }}
+                    >
+                      {review.nickname}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: 12,
+                        color: "var(--color-text-muted)",
+                        fontFamily: "var(--font-body)",
+                      }}
+                    >
+                      {review.reviewDate}
+                    </span>
                   </span>
                   {review.rating && renderStars(review.rating, 14)}
                 </div>

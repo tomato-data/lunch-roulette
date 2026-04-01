@@ -8,6 +8,10 @@ import { Rating } from "@/lib/domain/rating";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
+function getToday(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 function getService() {
   const db = getDb();
   const repo = new DrizzleReviewRepository(db as any);
@@ -61,20 +65,22 @@ export async function POST(req: Request, context: RouteContext) {
     return NextResponse.json({ error: "별점 또는 노트를 입력해주세요" }, { status: 400 });
   }
 
+  const today = getToday();
   const service = getService();
   const repo = new DrizzleReviewRepository(db as any);
 
-  // check if existing review (for upsert vs create status)
-  const existing = await repo.getReview(restaurantId, body.userId);
+  // check if existing review for today (for upsert vs create status)
+  const existing = await repo.getReviewByDate(restaurantId, body.userId, today);
 
   await service.createOrUpdateReview({
     restaurantId,
     userId: body.userId,
     rating: body.rating,
     content: body.content,
+    reviewDate: today,
   });
 
-  const review = await repo.getReview(restaurantId, body.userId);
+  const review = await repo.getReviewByDate(restaurantId, body.userId, today);
 
   return NextResponse.json(review, { status: existing ? 200 : 201 });
 }
@@ -86,13 +92,14 @@ export async function DELETE(req: Request, context: RouteContext) {
   const db = getDb();
   const repo = new DrizzleReviewRepository(db as any);
 
-  const existing = await repo.getReview(restaurantId, body.userId);
+  const today = getToday();
+  const existing = await repo.getReviewByDate(restaurantId, body.userId, today);
   if (!existing) {
-    return NextResponse.json({ error: "리뷰를 찾을 수 없습니다" }, { status: 404 });
+    return NextResponse.json({ error: "오늘 작성한 리뷰가 없습니다" }, { status: 404 });
   }
 
   const service = getService();
-  await service.deleteReview({ restaurantId, userId: body.userId });
+  await service.deleteReview({ restaurantId, userId: body.userId, reviewDate: today });
 
   return NextResponse.json({ deleted: true });
 }

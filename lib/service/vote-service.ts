@@ -3,7 +3,7 @@ import type { VoteRepository, VoteResult } from "./vote-repository";
 interface CastVoteInput {
   sessionId: number;
   menuItemId: number;
-  voterName: string;
+  userId: string;
 }
 
 export class VoteService {
@@ -15,12 +15,12 @@ export class VoteService {
       throw new Error("종료된 세션에는 투표할 수 없습니다");
     }
 
-    const alreadyVoted = await this.repo.hasVoted(input.sessionId, input.voterName);
+    const alreadyVoted = await this.repo.hasVoted(input.sessionId, input.userId);
     if (alreadyVoted) {
       throw new Error("이미 투표하셨습니다");
     }
 
-    await this.repo.saveVote(input.sessionId, input.menuItemId, input.voterName);
+    await this.repo.saveVote(input.sessionId, input.menuItemId, input.userId);
   }
 
   async getResults(sessionId: number): Promise<VoteResult[]> {

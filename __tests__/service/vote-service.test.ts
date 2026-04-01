@@ -18,9 +18,9 @@ describe("VoteService", () => {
     const repo = createFakeRepository();
     const service = new VoteService(repo);
 
-    await service.castVote({ sessionId: 1, menuItemId: 2, voterName: "Alice" });
+    await service.castVote({ sessionId: 1, menuItemId: 2, userId: "user-1" });
 
-    expect(repo.saveVote).toHaveBeenCalledWith(1, 2, "Alice");
+    expect(repo.saveVote).toHaveBeenCalledWith(1, 2, "user-1");
   });
 
   it("should reject vote on closed session", async () => {
@@ -30,7 +30,7 @@ describe("VoteService", () => {
     const service = new VoteService(repo);
 
     await expect(
-      service.castVote({ sessionId: 1, menuItemId: 1, voterName: "Alice" })
+      service.castVote({ sessionId: 1, menuItemId: 1, userId: "user-1" })
     ).rejects.toThrowError("종료된 세션에는 투표할 수 없습니다");
   });
 
@@ -41,7 +41,7 @@ describe("VoteService", () => {
     const service = new VoteService(repo);
 
     await expect(
-      service.castVote({ sessionId: 1, menuItemId: 1, voterName: "Alice" })
+      service.castVote({ sessionId: 1, menuItemId: 1, userId: "user-1" })
     ).rejects.toThrowError("이미 투표하셨습니다");
   });
 

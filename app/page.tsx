@@ -2,6 +2,11 @@
 
 import { useState, useEffect } from "react";
 
+interface User {
+  id: string;
+  nickname: string;
+}
+
 interface Session {
   id: number;
   title: string;
@@ -20,25 +25,63 @@ interface VoteResult {
   count: number;
 }
 
+const STORAGE_KEY = "lunch-roulette-user";
+
 export default function Home() {
+  const [user, setUser] = useState<User | null>(null);
+  const [nicknameInput, setNicknameInput] = useState("");
   const [sessions, setSessions] = useState<Session[]>([]);
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [results, setResults] = useState<VoteResult[]>([]);
   const [newTitle, setNewTitle] = useState("");
   const [newMenu, setNewMenu] = useState("");
-  const [voterName, setVoterName] = useState("");
   const [message, setMessage] = useState("");
 
+  // Load user from localStorage on mount
   useEffect(() => {
-    fetchSessions();
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored) as User;
+      // Verify user still exists on server
+      fetch(`/api/users?id=${parsed.id}`).then((res) => {
+        if (res.ok) {
+          setUser(parsed);
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
+        }
+      });
+    }
   }, []);
+
+  useEffect(() => {
+    if (user) fetchSessions();
+  }, [user]);
+
+  async function registerUser() {
+    if (!nicknameInput.trim()) return;
+    const res = await fetch("/api/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nickname: nicknameInput.trim() }),
+    });
+    if (res.ok) {
+      const newUser: User = await res.json();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newUser));
+      setUser(newUser);
+      setNicknameInput("");
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem(STORAGE_KEY);
+    setUser(null);
+    setSelectedSession(null);
+  }
 
   async function fetchSessions() {
     const res = await fetch("/api/sessions");
-    if (res.ok) {
-      setSessions(await res.json());
-    }
+    if (res.ok) setSessions(await res.json());
   }
 
   async function createSession() {
@@ -79,14 +122,11 @@ export default function Home() {
   }
 
   async function castVote(menuItemId: number) {
-    if (!selectedSession || !voterName.trim()) {
-      setMessage("이름을 입력해주세요!");
-      return;
-    }
+    if (!selectedSession || !user) return;
     const res = await fetch(`/api/sessions/${selectedSession.id}/vote`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ menuItemId, voterName: voterName.trim() }),
+      body: JSON.stringify({ menuItemId, userId: user.id }),
     });
     if (res.ok) {
       setMessage("투표 완료!");
@@ -104,9 +144,41 @@ export default function Home() {
     fetchSessions();
   }
 
+  // Nickname registration screen
+  if (!user) {
+    return (
+      <div style={{ maxWidth: 400, margin: "0 auto", padding: 40, fontFamily: "sans-serif", textAlign: "center" }}>
+        <h1>Lunch Roulette</h1>
+        <p style={{ color: "#666", marginBottom: 24 }}>닉네임을 설정해주세요</p>
+        <div style={{ display: "flex", gap: 8 }}>
+          <input
+            value={nicknameInput}
+            onChange={(e) => setNicknameInput(e.target.value)}
+            placeholder="닉네임 입력"
+            onKeyDown={(e) => e.key === "Enter" && registerUser()}
+            style={{ flex: 1, padding: 12, fontSize: 16 }}
+            autoFocus
+          />
+          <button onClick={registerUser} style={{ padding: "12px 20px", fontSize: 16 }}>
+            시작
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Main app
   return (
     <div style={{ maxWidth: 600, margin: "0 auto", padding: 20, fontFamily: "sans-serif" }}>
-      <h1>Lunch Roulette</h1>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <h1 style={{ margin: 0 }}>Lunch Roulette</h1>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ color: "#666" }}>{user.nickname}님</span>
+          <button onClick={logout} style={{ padding: "4px 8px", fontSize: 12, color: "#999" }}>
+            변경
+          </button>
+        </div>
+      </div>
 
       {/* Session Creation */}
       <section style={{ marginBottom: 24 }}>
@@ -171,19 +243,6 @@ export default function Home() {
                   추가
                 </button>
               </div>
-            </div>
-          )}
-
-          {/* Voter Name */}
-          {selectedSession.status === "open" && (
-            <div style={{ marginBottom: 16 }}>
-              <h3>내 이름</h3>
-              <input
-                value={voterName}
-                onChange={(e) => setVoterName(e.target.value)}
-                placeholder="이름 입력"
-                style={{ padding: 8, width: "100%" }}
-              />
             </div>
           )}
 

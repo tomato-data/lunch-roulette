@@ -13,6 +13,11 @@ function createTestDb() {
   const sqlite = new Database(":memory:");
   const db = drizzle(sqlite, { schema });
   sqlite.exec(`
+    CREATE TABLE users (
+      id TEXT PRIMARY KEY,
+      nickname TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
     CREATE TABLE vote_sessions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT NOT NULL,
@@ -28,11 +33,15 @@ function createTestDb() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       session_id INTEGER NOT NULL REFERENCES vote_sessions(id),
       menu_item_id INTEGER NOT NULL REFERENCES menu_items(id),
-      voter_name TEXT NOT NULL,
+      user_id TEXT NOT NULL REFERENCES users(id),
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
   `);
   return { db, sqlite };
+}
+
+function insertTestUser(db: any, id = "test-user-1", nickname = "Alice") {
+  db.insert(schema.users).values({ id, nickname }).run();
 }
 
 describe("API Route Handlers", () => {
@@ -88,11 +97,12 @@ describe("API Route Handlers", () => {
 
   describe("POST /api/sessions/[id]/vote", () => {
     it("should cast vote and return 201", async () => {
+      insertTestUser(db);
       const session = db.insert(schema.voteSessions).values({ title: "테스트" }).returning().get();
       const menu = db.insert(schema.menuItems).values({ sessionId: session.id, name: "김치찌개" }).returning().get();
       const req = new Request("http://localhost/api/sessions/1/vote", {
         method: "POST",
-        body: JSON.stringify({ menuItemId: menu.id, voterName: "Alice" }),
+        body: JSON.stringify({ menuItemId: menu.id, userId: "test-user-1" }),
         headers: { "Content-Type": "application/json" },
       });
 
@@ -102,13 +112,14 @@ describe("API Route Handlers", () => {
     });
 
     it("should return 409 for duplicate vote", async () => {
+      insertTestUser(db);
       const session = db.insert(schema.voteSessions).values({ title: "테스트" }).returning().get();
       const menu = db.insert(schema.menuItems).values({ sessionId: session.id, name: "김치찌개" }).returning().get();
-      db.insert(schema.votes).values({ sessionId: session.id, menuItemId: menu.id, voterName: "Alice" }).run();
+      db.insert(schema.votes).values({ sessionId: session.id, menuItemId: menu.id, userId: "test-user-1" }).run();
 
       const req = new Request("http://localhost/api/sessions/1/vote", {
         method: "POST",
-        body: JSON.stringify({ menuItemId: menu.id, voterName: "Alice" }),
+        body: JSON.stringify({ menuItemId: menu.id, userId: "test-user-1" }),
         headers: { "Content-Type": "application/json" },
       });
 
@@ -120,12 +131,15 @@ describe("API Route Handlers", () => {
 
   describe("GET /api/sessions/[id]/results", () => {
     it("should return vote counts", async () => {
+      insertTestUser(db, "user-a", "Alice");
+      insertTestUser(db, "user-b", "Bob");
+      insertTestUser(db, "user-c", "Charlie");
       const session = db.insert(schema.voteSessions).values({ title: "테스트" }).returning().get();
       const menu1 = db.insert(schema.menuItems).values({ sessionId: session.id, name: "김치찌개" }).returning().get();
       const menu2 = db.insert(schema.menuItems).values({ sessionId: session.id, name: "된장찌개" }).returning().get();
-      db.insert(schema.votes).values({ sessionId: session.id, menuItemId: menu1.id, voterName: "Alice" }).run();
-      db.insert(schema.votes).values({ sessionId: session.id, menuItemId: menu1.id, voterName: "Bob" }).run();
-      db.insert(schema.votes).values({ sessionId: session.id, menuItemId: menu2.id, voterName: "Charlie" }).run();
+      db.insert(schema.votes).values({ sessionId: session.id, menuItemId: menu1.id, userId: "user-a" }).run();
+      db.insert(schema.votes).values({ sessionId: session.id, menuItemId: menu1.id, userId: "user-b" }).run();
+      db.insert(schema.votes).values({ sessionId: session.id, menuItemId: menu2.id, userId: "user-c" }).run();
 
       const req = new Request("http://localhost/api/sessions/1/results");
 

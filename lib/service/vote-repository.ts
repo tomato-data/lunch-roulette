@@ -7,7 +7,7 @@ export interface VoteResult {
 export interface VoteRepository {
   getSessionStatus(sessionId: number): Promise<"open" | "closed" | null>;
   menuItemExists(sessionId: number, menuItemId: number): Promise<boolean>;
-  hasVoted(sessionId: number, voterName: string): Promise<boolean>;
-  saveVote(sessionId: number, menuItemId: number, voterName: string): Promise<void>;
+  hasVoted(sessionId: number, userId: string): Promise<boolean>;
+  saveVote(sessionId: number, menuItemId: number, userId: string): Promise<void>;
   getResults(sessionId: number): Promise<VoteResult[]>;
 }

@@ -25,17 +25,17 @@ export class DrizzleVoteRepository implements VoteRepository {
     return !!result;
   }
 
-  async hasVoted(sessionId: number, voterName: string): Promise<boolean> {
+  async hasVoted(sessionId: number, userId: string): Promise<boolean> {
     const result = this.db
       .select({ id: votes.id })
       .from(votes)
-      .where(and(eq(votes.sessionId, sessionId), eq(votes.voterName, voterName)))
+      .where(and(eq(votes.sessionId, sessionId), eq(votes.userId, userId)))
       .get();
     return !!result;
   }
 
-  async saveVote(sessionId: number, menuItemId: number, voterName: string): Promise<void> {
-    this.db.insert(votes).values({ sessionId, menuItemId, voterName }).run();
+  async saveVote(sessionId: number, menuItemId: number, userId: string): Promise<void> {
+    this.db.insert(votes).values({ sessionId, menuItemId, userId }).run();
   }
 
   async getResults(sessionId: number): Promise<VoteResult[]> {

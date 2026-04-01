@@ -9,13 +9,13 @@ export async function POST(
 ) {
   const { id } = await params;
   const sessionId = Number(id);
-  const { menuItemId, voterName } = await req.json();
+  const { menuItemId, userId } = await req.json();
 
   const repo = new DrizzleVoteRepository(getDb());
   const service = new VoteService(repo);
 
   try {
-    await service.castVote({ sessionId, menuItemId, voterName });
+    await service.castVote({ sessionId, menuItemId, userId });
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 409 });

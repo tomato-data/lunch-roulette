@@ -42,6 +42,15 @@ function createTestDb() {
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
+    CREATE TABLE reviews (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      restaurant_id INTEGER NOT NULL REFERENCES restaurants(id),
+      user_id TEXT NOT NULL REFERENCES users(id),
+      rating INTEGER,
+      content TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
   `);
   return { db, sqlite };
 }
@@ -84,6 +93,7 @@ describe("Restaurant API Route Handlers", () => {
       expect(body).toHaveLength(1);
       expect(body[0].name).toBe("맛집");
       expect(body[0].category).toBe("한식");
+      expect(body[0].avgRating).toBeNull();
     });
   });
 

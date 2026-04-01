@@ -9,6 +9,7 @@ interface Restaurant {
   category: string | null;
   description: string | null;
   photoPath: string | null;
+  avgRating: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -226,7 +227,14 @@ export default function RestaurantsPage() {
               </div>
               {/* Info */}
               <div style={{ padding: 12 }}>
-                <h3 style={{ margin: "0 0 4px 0", fontSize: 16 }}>{r.name}</h3>
+                <Link href={`/restaurants/${r.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+                  <h3 style={{ margin: "0 0 4px 0", fontSize: 16 }}>{r.name}</h3>
+                </Link>
+                {r.avgRating && (
+                  <div style={{ fontSize: 13, color: "#f59e0b", marginBottom: 4 }}>
+                    {"★".repeat(Math.round(r.avgRating))} <span style={{ color: "#6b7280" }}>{r.avgRating}</span>
+                  </div>
+                )}
                 {r.category && (
                   <span style={{ display: "inline-block", background: "#eff6ff", color: "#3b82f6", padding: "2px 8px", borderRadius: 12, fontSize: 12, marginBottom: 4 }}>
                     {r.category}

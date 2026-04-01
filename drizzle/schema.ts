@@ -41,6 +41,24 @@ export const restaurants = sqliteTable("restaurants", {
     .$defaultFn(() => new Date().toISOString()),
 });
 
+export const reviews = sqliteTable("reviews", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  restaurantId: integer("restaurant_id")
+    .notNull()
+    .references(() => restaurants.id),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id),
+  rating: integer("rating"),
+  content: text("content"),
+  createdAt: text("created_at")
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+  updatedAt: text("updated_at")
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+});
+
 export const votes = sqliteTable("votes", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   sessionId: integer("session_id")
